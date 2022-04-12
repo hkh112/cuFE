@@ -12,10 +12,10 @@ Note that you need to change the sm version in GPU to suit your device. The defa
 0) This source code provides the prediction of SVM.
 We need to get a model file after training by libsvm library.
 
-1) The main function call two kinds of prediction functions.\\
-predict() is for no encryption, IPFE on CPU, the naive version IPFE on GPU.\\
-predict2() is for the parallel version of IPFE on GPU.\\
-You may also comment out one of the prediction functions for testing.\\
+1) The main function call two kinds of prediction functions.\n
+predict() is for no encryption, IPFE on CPU, the naive version IPFE on GPU.\n
+predict2() is for the parallel version of IPFE on GPU.\n
+You may also comment out one of the prediction functions for testing.\n
 
 2) Each prediction functions call the one of svm_predict functions.
 (Original SVM: use svm_predict(). It is the same with the libsvm library.)\\
