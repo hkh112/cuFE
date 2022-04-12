@@ -11,30 +11,30 @@ Note that you need to change the sm version in GPU to suit your device. The defa
 
 0) This source code provides the prediction of SVM.
 
-We need to get a model file after training by libsvm library.
+    We need to get a model file after training by libsvm library.
 
 1) The main function call two kinds of prediction functions.
 
-predict() is for no encryption, IPFE on CPU, the naive version IPFE on GPU.
+    predict() is for no encryption, IPFE on CPU, the naive version IPFE on GPU.
 
-predict2() is for the parallel version of IPFE on GPU.
+    predict2() is for the parallel version of IPFE on GPU.
 
-You may also comment out one of the prediction functions for testing.
+    You may also comment out one of the prediction functions for testing.
 
 2) Each prediction functions call the one of svm_predict functions.
 
-(Original SVM: use svm_predict(). It is the same with the libsvm library.)
+    (Original SVM: use svm_predict(). It is the same with the libsvm library.)
 
-No encryption: use svm_predict2(). It is use encoding to compare with the IPFE version.
+    No encryption: use svm_predict2(). It is use encoding to compare with the IPFE version.
 
-IPFE on CPU: use svm_predict3(). It can select to use AVX2 or not by AVX2 definition in param.h file.
+    IPFE on CPU: use svm_predict3(). It can select to use AVX2 or not by AVX2 definition in param.h file.
 
-The naive version IPFE on GPU: use svm_predict4(). 
+    The naive version IPFE on GPU: use svm_predict4(). 
 
-The parallel version of IPFE on GPU: use svm_predict5(). There are two kinds of key generation and decryption functions. "_gui2" is merged version and "_gui3" is no merged version.\\
+    The parallel version of IPFE on GPU: use svm_predict5(). There are two kinds of key generation and decryption functions. "_gui2" is merged version and "_gui3" is no merged version.\\
 
 3) It can be tested as follow commend.
 
-$ ulimit -s unlimited
+    $ ulimit -s unlimited
 
-$ ./svm_ipfe-gpu (data file) (model file) (output file)
+    $ ./svm_ipfe-gpu (data file) (model file) (output file)
