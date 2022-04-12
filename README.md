@@ -33,7 +33,7 @@ Note that you need to change the sm version in GPU to suit your device. The defa
 
     The parallel version of IPFE on GPU: use svm_predict5(). There are two kinds of key generation and decryption functions. "_gui2" is merged version and "_gui3" is no merged version.
     
-    * You may also comment out one of the prediction functions for testing.
+    * You may also comment out one of the svm_prediction functions for testing.
 
 3) It can be tested as follow commend.
 
