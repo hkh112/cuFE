@@ -19,7 +19,7 @@ Note that you need to change the sm version in GPU to suit your device. The defa
 
     predict2() is for the parallel version of IPFE on GPU.
 
-    You may also comment out one of the prediction functions for testing.
+    * You may also comment out one of the prediction functions for testing.
 
 2) Each prediction functions call the one of svm_predict functions.
 
@@ -31,7 +31,9 @@ Note that you need to change the sm version in GPU to suit your device. The defa
 
     The naive version IPFE on GPU: use svm_predict4(). 
 
-    The parallel version of IPFE on GPU: use svm_predict5(). There are two kinds of key generation and decryption functions. "_gui2" is merged version and "_gui3" is no merged version.\\
+    The parallel version of IPFE on GPU: use svm_predict5(). There are two kinds of key generation and decryption functions. "_gui2" is merged version and "_gui3" is no merged version.
+    
+    * You may also comment out one of the prediction functions for testing.
 
 3) It can be tested as follow commend.
 
