@@ -1,113 +1,29 @@
-This repo is a sample Makefile for building a project that has both C++ (.cpp and .h) and CUDA (.cu and .cuh) source files. This Makefile assumes a project file structure as the following:
+# cuFE
+This is the code accompanying the paper "cuFE: High Performance Implementation of Inner-Product Functional Encryption on GPU Platform with Application to Support Vector Machine". 
 
-```
-|--> Project/
-       |--> Makefile
-       |--> src/ (source files)
-       |--> include/ (header files)
-       |--> bin/
-```
+# Introduction
+Privacy preservation is an emerging requirement in many applications, which becomes increasingly important in this highly connected era. Functional encryption allows the user to retrieve the results of computing a function without revealing the plaintext to the third party, effectively protecting the user's privacy. However, functional encryption is still time-consuming in the practical deployment, especially when it is applied to machine learning applications that involve huge amount of data. In this paper, a high performance GPU implementation of inner-product functional encryption (IPFE) is presented. Novel techniques are proposed to parallelize the Gaussian sampling, which one of the most time-consuming operations in the IPFE. A systematic investigation was also carried out to select the best strategy for implementing NTT and INTT for different security levels. This repository also contain source codes for implementing Support Vector Machine with Inner Product Functional Encryption, using the proposed gaussian sampling and Number Theoretic Transform on GPU.
 
-For example, you could have multiple .cpp and .cu files in the source directory (src/), multiple .h and .cuh header files in the header directory (include/), and the file with the main() function (titled main.cpp in this example) in the base directory. An example of this could be the following:
+# How to use
+There is a Makefile accompanied with the source codes in each separate folder. You can build the executable by typing "make".
 
-```
-|--> Project/
-       |--> Makefile
-       |--> main.cpp
-       |--> src/
-              |--> file1.cpp
-              |--> file2.cpp
-              |--> file_cuda1.cu
-              |--> file_cuda2.cu
-       |--> include/
-              |--> file1.h
-              |--> file2.h
-              |--> file1.cuh
-              |--> file2.cuh
-       |--> bin/
-```
+Note that you need to change the sm version in GPU to suit your device. The default is -arch=sm_75, which is suitable for RTX2060,RTX2070 and RTX2080.
 
-The Makefile in this repo compiles a .cu and .cuh file called cuda_kernel.cu and cuda_kernel.cuh, which contains a simple CUDA device function. The cuda_kernel.cuh header file is included in the main.cpp file and called in the main() function. The Makefile will compile all the CUDA and C++ source files in src/ first, then compile the main.cpp file, and finally link them together.
+0) This source code provides the prediction of SVM.
+We need to get a model file after training by libsvm library.
 
-To use this Makefile in your own projects, a few parameters may need to be changed. First, the CUDA root directory should be specified for your machine.
+1) The main function call two kinds of prediction functions.
+predict() is for no encryption, IPFE on CPU, the naive version IPFE on GPU.
+predict2() is for the parallel version of IPFE on GPU.
+You may also comment out one of the prediction functions for testing.
 
-```
-###########################################################
+2) Each prediction functions call the one of svm_predict functions.
+(Original SVM: use svm_predict(). It is the same with the libsvm library.)
+No encryption: use svm_predict2(). It is use encoding to compare with the IPFE version.
+IPFE on CPU: use svm_predict3(). It can select to use AVX2 or not by AVX2 definition in param.h file.
+The naive version IPFE on GPU: use svm_predict4(). 
+The parallel version of IPFE on GPU: use svm_predict5(). There are two kinds of key generation and decryption functions. "_gui2" is merged version and "_gui3" is no merged version.
 
-## USER SPECIFIC DIRECTORIES ##
-
-# CUDA directory:
-CUDA_ROOT_DIR=/usr/local/cuda
-
-##########################################################
-```
-
-In addition, any changes to compiler options, flags, or alias should be made.
-
-```
-##########################################################
-
-## CC COMPILER OPTIONS ##
-
-# CC compiler options:
-CC=g++
-CC_FLAGS=
-CC_LIBS=
-
-##########################################################
-
-## NVCC COMPILER OPTIONS ##
-
-# NVCC compiler options:
-NVCC=nvcc
-NVCC_FLAGS=
-NVCC_LIBS=
-
-##########################################################
-```
-
-The project's file structure can be changed if necessary.
-
-```
-##########################################################
-
-## Project file structure ##
-
-# Source file directory:
-SRC_DIR = src
-
-# Object file directory:
-OBJ_DIR = bin
-
-# Include header file diretory:
-INC_DIR = include
-
-##########################################################
-```
-
-Finally, and most important, all of the object files that will be created should be listed in the OBJS variable with a space between each entry. Each source file in your project should be listed here as $(OBJ_DIR)/yourfile.o , these are all of the compiled source files (object files) that will be linked together to create the executable file.
-
-```
-##########################################################
-
-## Make variables ##
-
-# Target executable name:
-EXE = run_test
-
-# Object files:
-OBJS = $(OBJ_DIR)/main.o $(OBJ_DIR)/cuda_kernel.o
-
-##########################################################
-```
-
-Two final notes:
-
-1. This Makefile was created on an Linux system and may not work for non-Linux OS.
-
-2. You may clone this repository or copy and paste any component of this repository into your projects. I hope it helps.
-
-
-
-
-
+3) It can be tested as follow commend.
+$ ulimit -s unlimited
+$ ./svm_ipfe-gpu (data file) (model file) (output file)
