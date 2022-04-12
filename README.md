@@ -11,31 +11,35 @@ Note that you need to change the sm version in GPU to suit your device. The defa
 
 0) This source code provides the prediction of SVM.
 
-    We need to get a model file after training by libsvm library.
+    We need to get a model file after training by libsvm library. The command for training is as follows:
 
-1) The main function call two kinds of prediction functions.
+    $ ./svm-train (data file)
 
-    predict() is for no encryption, IPFE on CPU, the naive version IPFE on GPU.
+1) The main function calls two kinds of prediction functions.
 
-    predict2() is for the parallel version of IPFE on GPU.
+    predict() is used for three purposes: SVM classification without encryption, SVM +IPFE executed on a CPU, and the naive version IPFE on a GPU.
+
+    predict2() is used for the optimized and merged version of IPFE on a GPU.
 
     * You may also comment out one of the prediction functions for testing.
 
-2) Each prediction functions call the one of svm_predict functions.
+2) Each prediction function calls one of the svm_predict functions.
 
     (Original SVM: use svm_predict(). It is the same with the libsvm library.)
 
-    No encryption: use svm_predict2(). It is use encoding to compare with the IPFE version.
+    No encryption: use svm_predict2(). It is used with encoding to compare with the IPFE version.
 
-    IPFE on CPU: use svm_predict3(). It can select to use AVX2 or not by AVX2 definition in param.h file.
+    IPFE on CPU: use svm_predict3(). You may enable AVX2 support in the param.h file.
+    
+    "#define AVX2" (line 7)
 
     The naive version IPFE on GPU: use svm_predict4(). 
 
-    The parallel version of IPFE on GPU: use svm_predict5(). There are two kinds of key generation and decryption functions. "_gui2" is merged version and "_gui3" is no merged version.
+    The parallel version of IPFE on GPU: use svm_predict5(). There are two kinds of key generation and decryption functions. "_gui2" is the merged version and "_gui3" is the optimized (not merged) version.
     
     * You may also comment out one of the svm_prediction functions for testing.
 
-3) It can be tested as follow commend.
+3) Run the following commands to test run the SVM classification protected by cuFE.
 
     $ ulimit -s unlimited
 
