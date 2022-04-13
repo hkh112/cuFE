@@ -25,7 +25,7 @@ Note that you need to change the sm version in GPU to suit your device. The defa
 
 2) Each prediction function calls one of the svm_predict functions.
 
-    (Original SVM: use svm_predict(). It is the same with the libsvm library.)
+    Original SVM: use svm_predict(). It is the same with the libsvm library.
 
     No encryption: use svm_predict2(). It is used with encoding to compare with the IPFE version.
 
