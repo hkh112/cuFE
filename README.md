@@ -11,7 +11,11 @@ Note that you need to change the sm version in GPU to suit your device. The defa
 
 0) This source code provides the prediction of SVM.
 
-    We need to get a model file after training by libsvm library. The command for training is as follows:
+    We need to get a model file after training a dataset by libsvm library. 
+    
+    The dataset is in https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/
+    
+    The command for training is as follows:
 
     $ ./svm-train (data file)
 
