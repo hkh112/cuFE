@@ -447,7 +447,7 @@ static inline void bernoulli_sampler_S2_64(uint64_t *b, uint64_t *x, unsigned ch
 	int i=0;
 	double vx64[4] = {0}, vx1_64[4] = {0}, vx2_64[4] = {0}, vsum64[4] = {0};
 	int64_t vt64[4] = {0}, vres64[4] = {0}, vres_mantissa64[4] = {0}, vres_exponent64[4] = {0}, vr_mantissa64[4] = {0}, vr_exponent64[4] = {0}, vr_exponent2_64[4] = {0}, vres_eq_164[4] = {0}, vr_lt_vres_mantissa64[4] = {0}, vr_lt_vres_exponent64[4] = {0};
-	// wklee V_INT64_DOUBLE in Hex form
+	// V_INT64_DOUBLE in Hex form
 	int64_t mask = 0x4330000000000000, *p;
 	double *p2;
 	/* 2^x=2^(floor(x)+a)=2^(floor(x))*2^a, where a is in [0,1]
@@ -470,7 +470,7 @@ static inline void bernoulli_sampler_S2_64(uint64_t *b, uint64_t *x, unsigned ch
 	// 	p2 = (double*) &x[i];
 	// 	vx64[i] = *p2;
 	// }
-	// wklee, sometimes the inputs from x are larger than 53-bit, wrong answer in double precision. Only happens in S2 and S3
+	// sometimes the inputs from x are larger than 53-bit, wrong answer in double precision. Only happens in S2 and S3
 	for(i=0; i<4; i++) vx64[i] = vx64[i] * BINARY_SAMPLER_K_2_INV_S2;
 	
 	for(i=0; i<4; i++) vx1_64[i] = floor(vx64[i]);		
