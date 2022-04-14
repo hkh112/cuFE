@@ -25,7 +25,7 @@ void histogram1(uint32_t data[SIFE_L][SIFE_NMODULI][SIFE_N])
 	pos = (uint32_t*) malloc(SIFE_L*SIFE_NMODULI*SIFE_N);
 	// convert positive
 	for(i=0; i<SIFE_L; i++)	{
-		for(j=0; j<1; j++){	// wklee, select only 1 moduli 
+		for(j=0; j<1; j++){	// select only 1 moduli 
 			for(k=0; k<SIFE_N; k++){
 				if(data[i][j][k] < SIFE_MOD_Q_I[j]/2)
 				{
@@ -109,7 +109,7 @@ void histogram3(uint32_t *data)
 
 	// convert positive
 	for(i=0; i<SIFE_L; i++)	{
-		for(j=2; j<3; j++){	// wklee, select only 1 moduli 
+		for(j=2; j<3; j++){	// select only 1 moduli 
 			for(k=0; k<SIFE_N; k++){
 				if(data[i*SIFE_NMODULI*SIFE_N + j*SIFE_N + k] < SIFE_MOD_Q_I[j]/2)
 				{
