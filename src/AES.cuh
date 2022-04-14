@@ -433,7 +433,7 @@ static __device__ void encAES256OneTblReuseRpt(uint8_t *out, const uint32_t *rk,
 		PUTU32(out + m*16 + 12, s3);
 	}
 }
-// // wklee, proposed One-T and reuse T0 for SBox (Fastest)
+// proposed One-T and reuse T0 for SBox (Fastest)
 // static __device__ void encAES256OneTblBytePermReuse(uint32_t *out, uint32_t* rk, uint32_t* t0G) {
 static __device__ void encAES256OneTblReuse(uint8_t *out, const uint32_t *rk, uint32_t counter){
 
