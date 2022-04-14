@@ -30,7 +30,7 @@ void histogram2(uint32_t data[SIFE_NMODULI][SIFE_N])
 	pos = (uint32_t*) malloc(SIFE_NMODULI*SIFE_N);
 	// convert positive
 
-		for(j=0; j<1; j++){	// wklee, select only 1 moduli 
+		for(j=0; j<1; j++){	// select only 1 moduli 
 			for(k=0; k<SIFE_N; k++){
 				if(data[j][k] < SIFE_MOD_Q_I[j]/2)
 				{
@@ -133,7 +133,7 @@ extern "C" void rlwe_sife_setup_gpu(uint32_t mpk[SIFE_L+1][SIFE_NMODULI][SIFE_N]
 	AESPrepareKey(m_EncryptKey1, seed2, 256);
 	AESPrepareKey(m_EncryptKey2, seed3, 256);
 
-	//wklee, fix this.
+	//fix this.
 	for(i=0; i<SIFE_NMODULI; i++)
 		for(j=0; j<SIFE_N; j++)
 			tmp[i*SIFE_N + j] = mpk[SIFE_L][i][j];
@@ -144,7 +144,7 @@ extern "C" void rlwe_sife_setup_gpu(uint32_t mpk[SIFE_L+1][SIFE_NMODULI][SIFE_N]
 	
 	gaussian_sampler_S1_gpu<<<SIFE_L, THREAD>>>(dev_rk1, d_msk);
 	gaussian_sampler_S1_gpu<<<SIFE_L, THREAD>>>(dev_rk2, d_ecrt);
-	// wklee: replace this with a kernel to copy data
+	// replace this with a kernel to copy data
 	cudaMemcpy(d_msk_ntt, d_msk, SIFE_L*SIFE_NMODULI*SIFE_N*sizeof(uint32_t),cudaMemcpyDeviceToDevice);	
 		// Store a in NTT domain
 #if SEC_LEVEL==0	
@@ -162,7 +162,7 @@ extern "C" void rlwe_sife_setup_gpu(uint32_t mpk[SIFE_L+1][SIFE_NMODULI][SIFE_N]
 	cudaMemcpy(msk, d_msk, SIFE_L*SIFE_NMODULI*SIFE_N*sizeof(uint32_t), cudaMemcpyDeviceToHost);
 	cudaMemcpy(tmp, d_mpk, SIFE_NMODULI*SIFE_N*sizeof(uint32_t),cudaMemcpyDeviceToHost);		
 
-	// wklee: replace this with cudaMemcpy
+	// replace this with cudaMemcpy
 	for(i=0; i<SIFE_NMODULI; i++)
 		for(j=0; j<SIFE_N; j++)
 			mpk[SIFE_L][i][j] = tmp[i*SIFE_N + j];
