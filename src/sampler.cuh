@@ -280,7 +280,7 @@ __device__ inline void bernoulli_sampler_S2_gpu(uint64_t *b, uint64_t *x, unsign
 	int i=0;
 	double vx64[4] = {0}, vx1_64[4] = {0}, vx2_64[4] = {0}, vsum64[4] = {0};
 	int64_t vt64[4] = {0}, vres64[4] = {0}, vres_mantissa64[4] = {0}, vres_exponent64[4] = {0}, vr_mantissa64[4] = {0}, vr_exponent64[4] = {0}, vr_exponent2_64[4] = {0}, vres_eq_164[4] = {0}, vr_lt_vres_mantissa64[4] = {0}, vr_lt_vres_exponent64[4] = {0};
-	// wklee V_INT64_DOUBLE in Hex form
+	// V_INT64_DOUBLE in Hex form
 	int64_t mask = 0x4330000000000000, *p;
 	double *p2;
 	/* 2^x=2^(floor(x)+a)=2^(floor(x))*2^a, where a is in [0,1]
@@ -365,7 +365,7 @@ __device__ inline void bernoulli_sampler_S3_gpu(uint64_t *b, uint64_t *x, unsign
 	int i=0;
 	double vx64[4] = {0}, vx1_64[4] = {0}, vx2_64[4] = {0}, vsum64[4] = {0};
 	int64_t vt64[4] = {0}, vres64[4] = {0}, vres_mantissa64[4] = {0}, vres_exponent64[4] = {0}, vr_mantissa64[4] = {0}, vr_exponent64[4] = {0}, vr_exponent2_64[4] = {0}, vres_eq_164[4] = {0}, vr_lt_vres_mantissa64[4] = {0}, vr_lt_vres_exponent64[4] = {0};
-	// wklee V_INT64_DOUBLE in Hex form
+	// V_INT64_DOUBLE in Hex form
 	int64_t mask = 0x4330000000000000, *p;
 	double *p2;
 	/* 2^x=2^(floor(x)+a)=2^(floor(x))*2^a, where a is in [0,1]
