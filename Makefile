@@ -52,7 +52,7 @@ INC_DIR = include
 EXE = svm_ipfe-gpu
 
 # Object files:
-OBJS = $(OBJ_DIR)/main.o $(OBJ_DIR)/rlwe_sife_gpu.o $(OBJ_DIR)/crt_gpu.o $(OBJ_DIR)/ntt_gpu.o $(OBJ_DIR)/sample_gpu.o  $(OBJ_DIR)/arith_rns.o $(OBJ_DIR)/crt.o $(OBJ_DIR)/randombytes.o $(OBJ_DIR)/gauss.o $(OBJ_DIR)/ntt.o $(OBJ_DIR)/function.o $(OBJ_DIR)/rlwe_sife.o $(OBJ_DIR)/sample.o $(OBJ_DIR)/aes256ctr.o $(OBJ_DIR)/svm.o 
+OBJS = $(OBJ_DIR)/main.o $(OBJ_DIR)/rlwe_sife_gpu.o $(OBJ_DIR)/crt_gpu.o $(OBJ_DIR)/ntt_gpu.o $(OBJ_DIR)/sample_gpu.o  $(OBJ_DIR)/arith_rns.o $(OBJ_DIR)/crt.o $(OBJ_DIR)/randombytes.o $(OBJ_DIR)/gauss.o $(OBJ_DIR)/ntt.o $(OBJ_DIR)/rlwe_sife.o $(OBJ_DIR)/sample.o $(OBJ_DIR)/aes256ctr.o $(OBJ_DIR)/svm.o 
 
 ##########################################################
 
