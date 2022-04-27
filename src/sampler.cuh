@@ -1,34 +1,11 @@
 #include "params.h"
 /*ceil(DESIRED_SIGMA/sigma_0) sigma_0=sqrt( 1/(2*log(2) ) )*/
-#if SEC_LEVEL==0
 
-//sigma_1 : 33 sigma_2 : 64880641 sigma_3 : 129761280
-/*
-#define BINARY_SAMPLER_K_S1 39		//sigma_1
-#define BINARY_SAMPLER_K_S2 76391117LL	//sigma_2
-#define BINARY_SAMPLER_K_S3 152782232LL	//sigma_3
-*/
-
-//sigma_1 : 33 sigma_2 : 59473921 sigma_3 : 118947840
-
-#define BINARY_SAMPLER_K_S1 39		//sigma_1
-#define BINARY_SAMPLER_K_S2 70025191LL	//sigma_2
-#define BINARY_SAMPLER_K_S3 140050379LL	//sigma_3
-
-
-#elif SEC_LEVEL==1
 
 #define BINARY_SAMPLER_K_S1 266		//sigma_1
 #define BINARY_SAMPLER_K_S2 304214978LL	//sigma_2
 #define BINARY_SAMPLER_K_S3 608429953LL	//sigma_3
 
-#elif SEC_LEVEL==2
-
-#define BINARY_SAMPLER_K_S1 2413
-#define BINARY_SAMPLER_K_S2 2029291141LL
-#define BINARY_SAMPLER_K_S3 2232220255LL
-
-#endif
 
 #define CDT_ENTRY_SIZE 16
 #define CDT_LOW_MASK 0x7fffffffffffffff
@@ -280,7 +257,7 @@ __device__ inline void bernoulli_sampler_S2_gpu(uint64_t *b, uint64_t *x, unsign
 	int i=0;
 	double vx64[4] = {0}, vx1_64[4] = {0}, vx2_64[4] = {0}, vsum64[4] = {0};
 	int64_t vt64[4] = {0}, vres64[4] = {0}, vres_mantissa64[4] = {0}, vres_exponent64[4] = {0}, vr_mantissa64[4] = {0}, vr_exponent64[4] = {0}, vr_exponent2_64[4] = {0}, vres_eq_164[4] = {0}, vr_lt_vres_mantissa64[4] = {0}, vr_lt_vres_exponent64[4] = {0};
-	// V_INT64_DOUBLE in Hex form
+	// Comment V_INT64_DOUBLE in Hex form
 	int64_t mask = 0x4330000000000000, *p;
 	double *p2;
 	/* 2^x=2^(floor(x)+a)=2^(floor(x))*2^a, where a is in [0,1]
@@ -365,7 +342,7 @@ __device__ inline void bernoulli_sampler_S3_gpu(uint64_t *b, uint64_t *x, unsign
 	int i=0;
 	double vx64[4] = {0}, vx1_64[4] = {0}, vx2_64[4] = {0}, vsum64[4] = {0};
 	int64_t vt64[4] = {0}, vres64[4] = {0}, vres_mantissa64[4] = {0}, vres_exponent64[4] = {0}, vr_mantissa64[4] = {0}, vr_exponent64[4] = {0}, vr_exponent2_64[4] = {0}, vres_eq_164[4] = {0}, vr_lt_vres_mantissa64[4] = {0}, vr_lt_vres_exponent64[4] = {0};
-	// V_INT64_DOUBLE in Hex form
+	// Comment V_INT64_DOUBLE in Hex form
 	int64_t mask = 0x4330000000000000, *p;
 	double *p2;
 	/* 2^x=2^(floor(x)+a)=2^(floor(x))*2^a, where a is in [0,1]

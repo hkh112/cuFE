@@ -11,10 +11,8 @@
 #include "arith_rns.h"
 #include "gauss.h"
 #include "aes256ctr.h"
-// #include "sample_gpu.cuh"
-// #include "crt_gpu.cuh"
-// #include "ntt_gpu.cuh"
-static long long cpucycles(void)
+
+long long cpucycles(void)
 {
     unsigned long long result;
     asm volatile(".byte 15;.byte 49;shlq $32,%%rdx;orq %%rdx,%%rax"
@@ -24,95 +22,11 @@ static long long cpucycles(void)
 
 #ifdef PERF	
 extern void rlwe_sife_setup_gpu(uint32_t mpk[SIFE_L+1][SIFE_NMODULI][SIFE_N], uint32_t msk[SIFE_L][SIFE_NMODULI][SIFE_N], unsigned char *seed2, unsigned char *seed3, float* part2_time);
-extern void rlwe_sife_encrypt_gpu(uint32_t m[SIFE_L], uint32_t mpk[SIFE_L+1][SIFE_NMODULI][SIFE_N], uint32_t c[SIFE_L+1][SIFE_NMODULI][SIFE_N], unsigned char *seed2, unsigned char *seed3, float* part2_time);
-extern void rlwe_sife_encrypt_gpu2(uint32_t* m, uint32_t mpk[SIFE_L+1][SIFE_NMODULI][SIFE_N], uint32_t* c, unsigned char *seed2, unsigned char *seed3, int repeat, float* part2_time);
-extern void rlwe_sife_keygen_gpu(const uint32_t y[SIFE_L], const uint32_t msk[SIFE_L][SIFE_NMODULI][SIFE_N], uint32_t sk_y[SIFE_NMODULI][SIFE_N], float* part2_time);
-extern void rlwe_sife_decrypt_gpu(uint32_t c[SIFE_L+1][SIFE_NMODULI][SIFE_N], const uint32_t y[SIFE_L], uint32_t sk_y[SIFE_NMODULI][SIFE_N], uint32_t d_y[SIFE_NMODULI][SIFE_N], float* part2_time);
+extern void rlwe_sife_encrypt_gpu(uint32_t* m, uint32_t mpk[SIFE_L+1][SIFE_NMODULI][SIFE_N], uint32_t* c, unsigned char *seed2, unsigned char *seed3, int repeat, float* part2_time);
 #else
 extern void rlwe_sife_setup_gpu(uint32_t mpk[SIFE_L+1][SIFE_NMODULI][SIFE_N], uint32_t msk[SIFE_L][SIFE_NMODULI][SIFE_N], unsigned char *seed2, unsigned char *seed3);
-extern void rlwe_sife_encrypt_gpu(uint32_t m[SIFE_L], uint32_t mpk[SIFE_L+1][SIFE_NMODULI][SIFE_N], uint32_t c[SIFE_L+1][SIFE_NMODULI][SIFE_N], unsigned char *seed2, unsigned char *seed3);
-extern void rlwe_sife_encrypt_gpu2(uint32_t* m, uint32_t mpk[SIFE_L+1][SIFE_NMODULI][SIFE_N], uint32_t* c, unsigned char *seed2, unsigned char *seed3, int repeat);
-extern void rlwe_sife_keygen_gpu(const uint32_t y[SIFE_L], const uint32_t msk[SIFE_L][SIFE_NMODULI][SIFE_N], uint32_t sk_y[SIFE_NMODULI][SIFE_N]);
-extern void rlwe_sife_decrypt_gpu(uint32_t c[SIFE_L+1][SIFE_NMODULI][SIFE_N], const uint32_t y[SIFE_L], uint32_t sk_y[SIFE_NMODULI][SIFE_N], uint32_t d_y[SIFE_NMODULI][SIFE_N]);
+extern void rlwe_sife_encrypt_gpu(uint32_t* m, uint32_t mpk[SIFE_L+1][SIFE_NMODULI][SIFE_N], uint32_t* c, unsigned char *seed2, unsigned char *seed3, int repeat);
 #endif   
-
-#define NUM_BIN 32
-// Check only one moduli at a time.
-void histogram2(uint32_t data[SIFE_NMODULI][SIFE_N])
-{
-	uint64_t i, j, k, idx, countpos = 0, countneg = 0;
-	uint64_t max = 1, min = 0, sum = 0;
-	uint64_t binspos[NUM_BIN], binsneg[NUM_BIN], binsize = 1;
-	uint32_t neg[SIFE_NMODULI*SIFE_N], pos[SIFE_NMODULI*SIFE_N];
-
-	// convert positive
-		for(j=2; j<3; j++){
-			for(k=0; k<SIFE_N; k++){
-				if(data[j][k] < SIFE_MOD_Q_I[j]/2)
-				{
-					pos[countpos] = data[j][k] ;					
-					countpos++;
-				}		
-				else
-				{
-					neg[countneg] = data[j][k] ;					
-					countneg++;				
-				}		
-			}
-		}		
-
-	printf("\n ************Histogram Calculation *************\n");
-	printf("Pos elements: %lu Neg elements: %lu \n", countpos, countneg );
-// This is for the positive side
-	// find the max
-	for(i=0; i<countpos; i++)	{
-		if(pos[i] > max)
-			max = pos[i];				
-	}
-	min = max;
-	// find the min
-	for(i=0; i<countpos; i++)	{
-		if(pos[i]< min)
-			min = pos[i];
-	}
-	binsize = (max - min)/NUM_BIN + ((max - min)%NUM_BIN !=0);
-	// reset all bins to 0
-	for(i=0; i<NUM_BIN; i++) binspos[i] = 0;
-	for(i=0; i<countpos; i++)	{
-		idx = (pos[i] - min)/binsize;
-		binspos[idx]++;		
-	}		
-	printf("\n Positive side ==> max: %lu min: %lu binsize: %lu\n", max, min, binsize);
-// This is for the negative  side
-	// find the max
-	for(i=0; i<countneg; i++)	{
-		if(neg[i] > max)
-			max = neg[i];				
-	}
-	min = max;
-	// find the min
-	for(i=0; i<countneg; i++)	{
-		if(neg[i]< min)
-			min = neg[i];
-	}
-	binsize = (max - min)/NUM_BIN + ((max - min)%NUM_BIN !=0);
-
-	// reset all bins to 0
-	for(i=0; i<NUM_BIN; i++) binsneg[i] = 0;
-	for(i=0; i<countneg; i++)	{
-		idx = (neg[i] - min)/binsize;
-		binsneg[idx]++;			
-	}		
-	
-	for(j=0; j<NUM_BIN; j++) sum += binsneg[j];
-	for(j=0; j<NUM_BIN; j++) printf("%lu  ", binsneg[j]);
-	printf("\n");
-
-	printf("\n Negative side ==> max: %lu min: %lu binsize: %lu\n", max, min, binsize);
-	for(j=0; j<NUM_BIN; j++) sum += binspos[j];
-	for(j=0; j<NUM_BIN; j++) printf("%lu  ", binspos[j]);
-	printf("\n");
-}
 
 #ifdef PERF	
 void rlwe_sife_setup(uint32_t mpk[SIFE_L+1][SIFE_NMODULI][SIFE_N], uint32_t msk[SIFE_L][SIFE_NMODULI][SIFE_N], double* time)  
@@ -158,7 +72,6 @@ void rlwe_sife_setup(uint32_t mpk[SIFE_L+1][SIFE_NMODULI][SIFE_N], uint32_t msk[
 			CT_forward(msk_ntt, j);
 			CT_forward(e_crt[j], j);
 			point_mul(mpk[SIFE_L][j], msk_ntt, mpk[i][j], j);
-			//poly_mul_ntt(mpk[SIFE_L][j], msk[i][j], mpk[i][j], j);
 			poly_add_mod(mpk[i][j], e_crt[j], mpk[i][j], j);
 		}
 	}
@@ -189,16 +102,10 @@ void rlwe_sife_setup_gui(uint32_t mpk[SIFE_L+1][SIFE_NMODULI][SIFE_N], uint32_t 
 #ifdef PERF	
 	CLOCK2=cpucycles();
     *part1_time += (double)CLOCK2 - CLOCK1;
-	//printf("rlwe_sife_setup_gpu part 1: %lu cycles\n", CLOCK2-CLOCK1);
 	rlwe_sife_setup_gpu(mpk, msk, seed2, seed3, part2_time);
 #else
 	rlwe_sife_setup_gpu(mpk, msk, seed2, seed3);
 #endif    
-
-	// histogram3(msk);	
-	// histogram2(e_crt);
-	// printf("\n mpk: \n"); for (i = 0; i < SIFE_L+1; i++)  for (j = 0; j < SIFE_NMODULI; j++) for (k = 0; k < SIFE_N; k++) printf("%d ", mpk[i][j][k]);
-	// printf("\n e_crt: \n");for (i = 0; i < 1; i++)  for (j = 0; j < SIFE_NMODULI; j++) for (k = 0; k < SIFE_N; k++) printf("%u %d \n", k, e_crt[i][j][k]);
 }
 
 #ifdef PERF	
@@ -248,7 +155,6 @@ void rlwe_sife_encrypt(uint32_t m[SIFE_L], uint32_t mpk[SIFE_L+1][SIFE_NMODULI][
 	}
 
 	for (i = 0; i < SIFE_NMODULI; ++i) {
-		//poly_mul_ntt(mpk[SIFE_L][i], r_crt[i], c[SIFE_L][i], i);
 		point_mul(mpk[SIFE_L][i], r_crt[i], c[SIFE_L][i], i);
 		GS_reverse(c[SIFE_L][i], i);
 		poly_add_mod(c[SIFE_L][i], f_crt[i], c[SIFE_L][i], i);
@@ -260,7 +166,6 @@ void rlwe_sife_encrypt(uint32_t m[SIFE_L], uint32_t mpk[SIFE_L+1][SIFE_NMODULI][
 		gaussian_sampler_S3(&state_s3, f_crt, SIFE_N);
 		
 		for (j = 0; j < SIFE_NMODULI; ++j) {
-			//poly_mul_ntt(mpk[i][j], r_crt[j], c[i][j], j);
 			point_mul(mpk[i][j], r_crt[j], c[i][j], j);
 			GS_reverse(c[i][j], j);
 			poly_add_mod(c[i][j], f_crt[j], c[i][j], j);
@@ -276,9 +181,9 @@ void rlwe_sife_encrypt(uint32_t m[SIFE_L], uint32_t mpk[SIFE_L+1][SIFE_NMODULI][
 }
 
 #ifdef PERF	
-void rlwe_sife_encrypt_gui(uint32_t m[SIFE_L], uint32_t mpk[SIFE_L+1][SIFE_NMODULI][SIFE_N], uint32_t c[SIFE_L+1][SIFE_NMODULI][SIFE_N], double* part1_time, float* part2_time)  
+void rlwe_sife_encrypt_gui(uint32_t* m, uint32_t mpk[SIFE_L+1][SIFE_NMODULI][SIFE_N], uint32_t* c, int repeat, double* part1_time, float* part2_time)  
 #else
-void rlwe_sife_encrypt_gui(uint32_t m[SIFE_L], uint32_t mpk[SIFE_L+1][SIFE_NMODULI][SIFE_N], uint32_t c[SIFE_L+1][SIFE_NMODULI][SIFE_N]) //add const keywords
+void rlwe_sife_encrypt_gui(uint32_t* m, uint32_t mpk[SIFE_L+1][SIFE_NMODULI][SIFE_N], uint32_t* c, int repeat) //add const keywords
 #endif   
 {
 	int i, j, k, l;
@@ -298,12 +203,11 @@ void rlwe_sife_encrypt_gui(uint32_t m[SIFE_L], uint32_t mpk[SIFE_L+1][SIFE_NMODU
 
 	// Sample r, f_0 from D_sigma2
 #ifdef PERF
-	rlwe_sife_encrypt_gpu(m, mpk, c, seed, seed, part2_time);
+	rlwe_sife_encrypt_gpu(m, mpk, c, seed, seed, repeat, part2_time);
 	//printf("rlwe_sife_encrypt part 2: %.4f \n", *part2_time);     
 #else
-	rlwe_sife_encrypt_gpu(m, mpk, c, seed, seed);
+	rlwe_sife_encrypt_gpu(m, mpk, c, seed, seed, repeat);
 #endif   
-	
 	// printf("\n c: \n"); for (j = 0; j <SIFE_L+1; j++)  for (k = 0; k < SIFE_NMODULI; k++) for (l = 0; l < SIFE_N; l++) printf("%u ", c[j][k][l]);		
 }
 
@@ -338,35 +242,6 @@ void rlwe_sife_keygen(const uint32_t y[SIFE_L], const uint32_t msk[SIFE_L][SIFE_
 	CLOCK2=cpucycles();
 	*time += CLOCK2 - CLOCK1;
 #endif   
-}
-
-#ifdef PERF	
-void rlwe_sife_keygen_gui(const uint32_t y[SIFE_L], const uint32_t msk[SIFE_L][SIFE_NMODULI][SIFE_N], uint32_t sk_y[SIFE_NMODULI][SIFE_N], double* part1_time, float* part2_time)
-#else
-void rlwe_sife_keygen_gui(const uint32_t y[SIFE_L], const uint32_t msk[SIFE_L][SIFE_NMODULI][SIFE_N], uint32_t sk_y[SIFE_NMODULI][SIFE_N])
-#endif   
-{
-	int i, j, k;
-	uint64_t mac;
-#ifdef PERF	
-	uint64_t CLOCK1, CLOCK2;
-	CLOCK1=cpucycles();
-#endif   
-	memset(sk_y, 0, SIFE_NMODULI*SIFE_N*sizeof(uint32_t));
-#ifdef PERF	
-	CLOCK2=cpucycles();
-	*part1_time += CLOCK2 - CLOCK1;
-	//printf("rlwe_sife_keygen: %lu \n", CLOCK2-CLOCK1);	
-#endif   
-
-#ifdef PERF
-	rlwe_sife_keygen_gpu(y, msk, sk_y, part2_time);
-  	//printf("rlwe_sife_encrypt part 2: %.4f \n", *part2_time);     
-#else
-	rlwe_sife_keygen_gpu(y, msk, sk_y);
-#endif   
-
-	// printf("\n sk_y: \n"); for (i = 0; i < SIFE_NMODULI; i++) for (j = 0; j < SIFE_N; j++) printf("%u ", sk_y[i][j]);		
 }
 
 #ifdef PERF	
@@ -409,126 +284,6 @@ void rlwe_sife_decrypt_gmp(uint32_t c[SIFE_L+1][SIFE_NMODULI][SIFE_N], const uin
 	*time += CLOCK2 - CLOCK1;
 #endif   
 }
-
-#ifdef PERF	
-void rlwe_sife_decrypt_gmp_gui(uint32_t c[SIFE_L+1][SIFE_NMODULI][SIFE_N], const uint32_t y[SIFE_L], uint32_t sk_y[SIFE_NMODULI][SIFE_N], mpz_t dy[SIFE_N], double* part1_time, float* part2_time)  
-#else
-void rlwe_sife_decrypt_gmp_gui(uint32_t c[SIFE_L+1][SIFE_NMODULI][SIFE_N], const uint32_t y[SIFE_L], uint32_t sk_y[SIFE_NMODULI][SIFE_N], mpz_t dy[SIFE_N])
-#endif   
-{
-	int i, j, k;
-	uint64_t mac;
-	uint32_t d_y[SIFE_NMODULI][SIFE_N] = {0};
-
-#ifdef PERF
-	rlwe_sife_decrypt_gpu(c, y, sk_y, d_y, part2_time);   
-#else
-	rlwe_sife_decrypt_gpu(c, y, sk_y, d_y);
-#endif   
-    
-#ifdef PERF	
-	uint64_t CLOCK1, CLOCK2;
-	CLOCK1=cpucycles();
-#endif
-	//crt_reverse(dy, d_y);
-	crt_reverse_gmp(dy, d_y);
-#ifdef PERF	
-	CLOCK2=cpucycles();
-	*part1_time += CLOCK2 - CLOCK1;
-	//printf("rlwe_sife_decrypt_gmp part 2: %lu \n", CLOCK2-CLOCK1);
-#endif
-	// printf("\n d_y: \n"); for (i = 0; i < SIFE_NMODULI; i++) for (j = 0; j < SIFE_N; j++) printf("%u ", d_y[i][j]);	
-	// printf("\n dy: \n"); for (j = 0; j < SIFE_N; j++) printf("%u ", dy[j]);		
-}
-
-void rlwe_sife_encrypt_vec(uint32_t m[SIFE_L][SIFE_N], uint32_t mpk[SIFE_L+1][SIFE_NMODULI][SIFE_N], uint32_t c[SIFE_L+1][SIFE_NMODULI][SIFE_N]) //add const keywords
-{
-	int i, j, k;
-	uint32_t r_crt[SIFE_NMODULI][SIFE_N], f_crt[SIFE_NMODULI][SIFE_N];
-
-	uint32_t m_crt[SIFE_L][SIFE_NMODULI][SIFE_N];
-
-	aes256ctr_ctx state_s2, state_s3;
-	unsigned char seed[32];
-
-	// CRT and scaled message
-	uint64_t mxm;
-	for (i = 0; i < SIFE_L; ++i) {
-		crt_convert(m[i], m_crt[i]);
-		for (j = 0; j < SIFE_NMODULI; ++j) {
-			for (k = 0; k < SIFE_N; ++k) {
-				mxm = (uint64_t)m_crt[i][j][k] * SIFE_SCALE_M_MOD_Q_I[j];
-				m_crt[i][j][k] = mod_prime(mxm, j);
-			}
-		}
-	}
-
-	randombytes(seed, 32);
-	aes256ctr_init(&state_s2, seed, 0);
-
-	gaussian_sampler_S2(&state_s2, r_crt, SIFE_N);
-	gaussian_sampler_S2(&state_s2, f_crt, SIFE_N);
-
-	// r in NTT domain
-	for (i = 0; i < SIFE_NMODULI; ++i) {
-		CT_forward(r_crt[i], i);
-	}
-
-	for (i = 0; i < SIFE_NMODULI; ++i) {
-		//poly_mul_ntt(mpk[SIFE_L][i], r_crt[i], c[SIFE_L][i], i);
-		point_mul(mpk[SIFE_L][i], r_crt[i], c[SIFE_L][i], i);
-		GS_reverse(c[SIFE_L][i], i);
-		poly_add_mod(c[SIFE_L][i], f_crt[i], c[SIFE_L][i], i);
-	}
-
-	// Sample f_i with i = 1...l from D_sigma3
-	// c_i = pk_i * r + f_i + (floor(q/p)m_i)1_R
-	for (i = 0; i < SIFE_L; ++i) {
-		gaussian_sampler_S3(&state_s3, f_crt, SIFE_N);
-		
-		for (j = 0; j < SIFE_NMODULI; ++j) {
-			//poly_mul_ntt(mpk[i][j], r_crt[j], c[i][j], j);
-			point_mul(mpk[i][j], r_crt[j], c[i][j], j);
-			GS_reverse(c[i][j], j);
-			poly_add_mod(c[i][j], f_crt[j], c[i][j], j);
-			poly_add_mod(c[i][j], m_crt[i][j], c[i][j], j);
-		}
-	}
-}
-
-
-void rlwe_sife_decrypt_gmp_vec(uint32_t c[SIFE_L+1][SIFE_NMODULI][SIFE_N], const uint32_t y[SIFE_L], uint32_t sk_y[SIFE_NMODULI][SIFE_N], mpz_t dy[SIFE_N])
-{
-	int i, j, k;
-	uint64_t mac;
-
-	uint32_t c0sy[SIFE_NMODULI][SIFE_N];
-	uint32_t d_y[SIFE_NMODULI][SIFE_N] = {0};
-
-	uint32_t y_crt[SIFE_NMODULI][SIFE_L];
-
-	crt_convert_generic(y, y_crt, SIFE_L);
-
-	for (i = 0; i < SIFE_L; ++i) {
-		for (j = 0; j < SIFE_NMODULI; ++j) {
-			for (k = 0; k < SIFE_N; ++k) {
-				mac = (uint64_t)y_crt[j][i]*c[i][j][k];
-				mac = mac + d_y[j][k];
-				d_y[j][k] = mod_prime(mac, j);
-			}
-		}
-	}
-
-	for (i = 0; i < SIFE_NMODULI; ++i) {
-		poly_mul_ntt(c[SIFE_L][i], sk_y[i], c0sy[i], i);
-		poly_sub_mod(d_y[i], c0sy[i], d_y[i], i);
-	}
-
-	//crt_reverse(dy, d_y);
-	crt_reverse_gmp(dy, d_y);
-}
-
-
 
 void round_extract_gmp(mpz_t a[SIFE_N])
 {
@@ -574,37 +329,6 @@ void round_extract_gmp(mpz_t a[SIFE_N])
 	mpz_clear(SIFE_Q_gmp);
 	mpz_clear(SIFE_P_gmp);
 	mpz_clear(SIFE_Q_gmp_by2);
-}
-
-#ifdef PERF	
-void rlwe_sife_encrypt_gui2(uint32_t* m, uint32_t mpk[SIFE_L+1][SIFE_NMODULI][SIFE_N], uint32_t* c, int repeat, double* part1_time, float* part2_time)  
-#else
-void rlwe_sife_encrypt_gui2(uint32_t* m, uint32_t mpk[SIFE_L+1][SIFE_NMODULI][SIFE_N], uint32_t* c, int repeat) //add const keywords
-#endif   
-{
-	int i, j, k, l;
-	unsigned char seed[32];
-
-#ifdef PERF	
-	uint64_t CLOCK1, CLOCK2;
-    CLOCK1=cpucycles();
-#endif   
-	randombytes(seed, 32);
-#ifdef PERF	
-	CLOCK2=cpucycles();
-	*part1_time += CLOCK2 - CLOCK1;
-	//printf("rlwe_sife_encrypt part 1: %lu cycles\n", CLOCK2-CLOCK1);
-#endif   
-	// aes256ctr_init(&state_s2, seed, 0);
-
-	// Sample r, f_0 from D_sigma2
-#ifdef PERF
-	rlwe_sife_encrypt_gpu2(m, mpk, c, seed, seed, repeat, part2_time);
-	//printf("rlwe_sife_encrypt part 2: %.4f \n", *part2_time);     
-#else
-	rlwe_sife_encrypt_gpu2(m, mpk, c, seed, seed, repeat);
-#endif   
-	// printf("\n c: \n"); for (j = 0; j <SIFE_L+1; j++)  for (k = 0; k < SIFE_NMODULI; k++) for (l = 0; l < SIFE_N; l++) printf("%u ", c[j][k][l]);		
 }
 
 double round_extract_gmp2(uint32_t d_y[SIFE_NMODULI][SIFE_N])
