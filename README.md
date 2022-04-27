@@ -15,7 +15,7 @@ Note that you need to change the sm version in GPU to suit your device. The defa
     
     The dataset is in https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/
     
-    The command for training is as follows:
+    We can get a training program called svm-train by compiling the source code from the libsvm library. The command for training is as follows:
 
     $ ./svm-train (data file)
 
