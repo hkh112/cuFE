@@ -3,8 +3,8 @@
 #include <stdint.h>
 
 #define Malloc(type,n) (type *)malloc((n)*sizeof(type))
-#define max_data 100
-#define CLOCKS_PER_MS 3000000
+#define max_data 100          // Modify this to select how much data to classify.
+#define CLOCKS_PER_MS 3000000 // Modify this to the clock speed of your CPU
 
 #define PERF
 //#define AVX2
